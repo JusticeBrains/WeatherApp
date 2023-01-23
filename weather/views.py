@@ -1,3 +1,4 @@
+import os
 import requests
 from django.shortcuts import render
 
@@ -6,8 +7,8 @@ from .models import City
 
 
 def index(request):
-    url = 'http://api.openweathermap.org/geo/1.0/direct?q={}&appid=2c76c469896544c20c6224f4ab128f53'
-    urllatlon = 'https://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid=2c76c469896544c20c6224f4ab128f53'
+    url = 'http://api.openweathermap.org/geo/1.0/direct?q={}&appid={}'
+    urllatlon = 'https://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid={}'
 
     cities = City.objects.all()  # return all the cities in the database
 
@@ -21,7 +22,7 @@ def index(request):
     for city in cities:
         # get latitude and longitude of the city
         get_lat_lon = requests.get(
-            url.format(city)).json()  # request the API data and convert the JSON to Python data types
+            url.format(city,os.getenv('API_KEY'))).json()  # request the API data and convert the JSON to Python data types
 
         latlong = {
             'name': get_lat_lon[0]['name'],
@@ -29,7 +30,7 @@ def index(request):
             'long': get_lat_lon[0]['lon']
         }
 
-        city_weather = requests.get(urllatlon.format(latlong['lat'], latlong['long'])).json()
+        city_weather = requests.get(urllatlon.format(latlong['lat'], latlong['long'],os.getenv('API_KEY'))).json()
 
         weather = {
             'city': city_weather['name'],
